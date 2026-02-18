@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{REPORT_TITLE}}</title>
+  <style>
+    :root{
+      --ink:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --bg:#ffffff;
+      --soft:#f9fafb;
+      --brand:#0f172a;
+
+      --crit:#7f1d1d;
+      --high:#9a3412;
+      --med:#92400e;
+      --low:#1f2937;
+      --info:#374151;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ padding:0; margin:0; background:var(--bg); color:var(--ink); }
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 12.5pt;
+      line-height: 1.45;
+    }
+
+    /* Page layout */
+    .page{ padding: 28mm 20mm 22mm; }
+    .page-break{ page-break-before: always; break-before: page; }
+
+    /* Header / Footer (works via fixed positioning in many renderers) */
+    header, footer{
+      position: fixed;
+      left: 20mm; right: 20mm;
+      color: var(--muted);
+      font-size: 9.5pt;
+    }
+    header{ top: 12mm; }
+    footer{ bottom: 10mm; display:flex; justify-content:space-between; gap:16px; }
+    .footer-right{ text-align:right; }
+
+    /* Title / cover */
+    .cover{
+      padding-top: 55mm;
+    }
+    .pill{
+      display:inline-block;
+      border:1px solid var(--border);
+      background:var(--soft);
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:10pt;
+      letter-spacing:.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    h1{
+      margin: 14px 0 8px;
+      font-size: 28pt;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--brand);
+    }
+    .subtitle{
+      margin:0;
+      font-size: 13pt;
+      color: var(--muted);
+    }
+    .meta{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px 24px;
+      max-width: 640px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+    .meta .k{ color: var(--muted); font-size: 10pt; text-transform: uppercase; letter-spacing:.04em;}
+    .meta .v{ font-weight:600; margin-top:2px; }
+
+    /* Headings */
+    h2{
+      margin: 18px 0 8px;
+      padding-top: 4px;
+      font-size: 16.5pt;
+      line-height: 1.2;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      color: var(--brand);
+    }
+    h3{
+      margin: 14px 0 6px;
+      font-size: 13.5pt;
+      color: var(--ink);
+    }
+    h4{
+      margin: 10px 0 4px;
+      font-size: 12pt;
+      color: var(--ink);
+    }
+
+    p{ margin: 8px 0; }
+    ul,ol{ margin: 8px 0 8px 22px; }
+    li{ margin: 3px 0; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: 10.5pt; }
+
+    /* Cards */
+    .card{
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #fff;
+      margin: 10px 0;
+    }
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 11.5pt;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+    th{
+      background: var(--soft);
+      text-align:left;
+      font-weight:700;
+      color: var(--brand);
+    }
+    .nowrap{ white-space:nowrap; }
+
+    /* Severity badges */
+    .badge{
+      display:inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10pt;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--soft);
+    }
+    .sev-critical{ color: var(--crit); border-color: rgba(127,29,29,.25); background: rgba(127,29,29,.06); }
+    .sev-high{ color: var(--high); border-color: rgba(154,52,18,.25); background: rgba(154,52,18,.06); }
+    .sev-medium{ color: var(--med); border-color: rgba(146,64,14,.25); background: rgba(146,64,14,.06); }
+    .sev-low{ color: var(--low); border-color: rgba(31,41,55,.25); background: rgba(31,41,55,.06); }
+    .sev-info{ color: var(--info); border-color: rgba(55,65,81,.25); background: rgba(55,65,81,.06); }
+
+    /* Findings */
+    .finding{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 14px 10px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .finding-title{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .finding-title h3{ margin:0; }
+    .kv{
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      gap:6px 12px;
+      margin: 10px 0 0;
+      font-size: 11.5pt;
+    }
+    .kv .k{ color: var(--muted); }
+    .kv .v{ font-weight:600; }
+    .section-label{
+      margin-top: 10px;
+      font-weight: 800;
+      color: var(--brand);
+    }
+    .code, code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 10.5pt;
+      background: var(--soft);
+      border:1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 6px;
+    }
+    pre{
+      background: var(--soft);
+      border:1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 10px;
+      overflow-wrap:anywhere;
+      white-space: pre-wrap;
+      margin: 8px 0;
+    }
+
+    /* TOC */
+    .toc a{ color: inherit; text-decoration:none; }
+    .toc .row{
+      display:flex; justify-content:space-between; gap:12px;
+      padding: 6px 0; border-bottom: 1px dashed var(--border);
+    }
+    .toc .row:last-child{ border-bottom:none; }
+    .toc .name{ font-weight:600; }
+    .toc .page-num{ color: var(--muted); }
+
+    /* Print helpers */
+    @page{
+      margin: 16mm 14mm 14mm;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="muted small">{{HEADER_LEFT}}</div>
+  </header>
+
+  <footer>
+    <div class="small">{{FOOTER_LEFT}}</div>
+    <div class="footer-right small">{{FOOTER_RIGHT}}</div>
+  </footer>
+
+  <!-- COVER -->
+  <div class="page cover">
+    <div class="pill">Business Confidential</div>
+    <h1>{{COVER_MAIN_TITLE}}</h1>
+    <p class="subtitle">{{COVER_SUBTITLE}}</p>
+
+    <div class="meta">
+      <div>
+        <div class="k">Client</div>
+        <div class="v">{{CLIENT_NAME}}</div>
+      </div>
+      <div>
+        <div class="k">Report Date</div>
+        <div class="v">{{REPORT_DATE}}</div>
+      </div>
+      <div>
+        <div class="k">Engagement</div>
+        <div class="v">{{ENGAGEMENT_TYPE}}</div>
+      </div>
+      <div>
+        <div class="k">Assessment Window</div>
+        <div class="v">{{ASSESSMENT_WINDOW}}</div>
+      </div>
+    </div>
+
+    <p class="muted small" style="margin-top:18px;">
+      {{CONFIDENTIALITY_FOOTNOTE}}
+    </p>
+  </div>
+
+  <!-- TOC -->
+  <div class="page page-break">
+    <h2 id="toc">Table of Contents</h2>
+    <div class="toc">
+      {{TOC_ROWS}}
+      <!-- Example row:
+      <div class="row"><span class="name"><a href="#confidentiality">Confidentiality Statement</a></span><span class="page-num">4</span></div>
+      -->
+    </div>
+  </div>
+
+  <!-- CONFIDENTIALITY / DISCLAIMER / CONTACT -->
+  <div class="page page-break">
+    <h2 id="confidentiality">Confidentiality Statement</h2>
+    <p>{{CONFIDENTIALITY_STATEMENT}}</p>
+
+    <h2 id="disclaimer">Disclaimer</h2>
+    <p>{{DISCLAIMER}}</p>
+
+    <h2 id="contact">Contact Information</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Title</th>
+          <th>Contact Information</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{CONTACT_ROWS}}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ASSESSMENT COMPONENTS -->
+  <div class="page page-break">
+    <h2 id="components">Assessment Components</h2>
+
+    <h3 id="external-pt">External Penetration Test</h3>
+    <p>{{EXTERNAL_PT_DESCRIPTION}}</p>
+
+    <h3 id="web-app-testing">Web Application Testing</h3>
+    <p>{{WEB_APP_TESTING_DESCRIPTION}}</p>
+
+    <h3 id="api-scenarios">Application Programming Interface (API) Scenarios</h3>
+    <p>{{API_SCENARIOS_DESCRIPTION}}</p>
+  </div>
+
+  <!-- SEVERITY RATINGS -->
+  <div class="page page-break">
+    <h2 id="severity">Finding Severity Ratings</h2>
+    <p>{{SEVERITY_INTRO}}</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th class="nowrap">CVSS v3 Score Range</th>
+          <th>Definition</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge sev-critical">Critical</span></td>
+          <td class="nowrap">9.0 – 10.0</td>
+          <td>Exploitation is straightforward and usually results in system-level compromise. Patch immediately.</td>
+        </tr>
+        <tr>
+          <td><span class="badge sev-high">High</span></td>
+          <td class="nowrap">7.0 – 8.9</td>
+          <td>Exploitation is more difficult but could cause elevated privileges and potentially a loss of data or downtime. Patch ASAP.</td>
+        </tr>
+        <tr>
+          <td><span class="badge sev-medium">Medium</span></td>
+          <td class="nowrap">4.0 – 6.9</td>
+          <td>Vulnerabilities exist but are not directly exploitable or require additional steps. Patch after high-priority items.</td>
+        </tr>
+        <tr>
+          <td><span class="badge sev-low">Low</span></td>
+          <td class="nowrap">0.1 – 3.9</td>
+          <td>Non-exploitable but reduces attack surface. Patch during maintenance window.</td>
+        </tr>
+        <tr>
+          <td><span class="badge sev-info">Informational</span></td>
+          <td class="nowrap">N/A</td>
+          <td>No vulnerability exists. Additional information observed during testing.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="cvss">CVSS v3 Scoring System</h2>
+    <p>{{CVSS_DESCRIPTION}}</p>
+  </div>
+
+  <!-- SCOPE -->
+  <div class="page page-break">
+    <h2 id="scope">Scope</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Assessment Scope</h3>
+        {{SCOPE_HTML}}
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Scope Exclusions</h3>
+        {{SCOPE_EXCLUSIONS_HTML}}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">Client Allowances</h3>
+      {{CLIENT_ALLOWANCES_HTML}}
+    </div>
+  </div>
+
+  <!-- EXEC SUMMARY -->
+  <div class="page page-break">
+    <h2 id="exec-summary">Executive Summary</h2>
+    {{EXEC_SUMMARY_HTML}}
+
+    <h3 id="attack-summary">Attack Summary</h3>
+    {{ATTACK_SUMMARY_HTML}}
+
+    <h3 id="strengths">Security Strengths</h3>
+    {{SECURITY_STRENGTHS_HTML}}
+
+    <h3 id="weaknesses">Security Weaknesses</h3>
+    {{SECURITY_WEAKNESSES_TABLE_HTML}}
+
+    <h3 id="impact-chart">Vulnerabilities by Impact</h3>
+    <p class="muted small">Chart placeholder (optional): render in HTML as an image or simple table.</p>
+    {{VULN_BY_IMPACT_HTML}}
+  </div>
+
+  <!-- RISK SUMMARY TABLE -->
+  <div class="page page-break">
+    <h2 id="risk-summary">Risk Summary Table</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Finding Title</th>
+          <th class="nowrap">Severity</th>
+          <th>Affected Assets</th>
+          <th class="nowrap">Remediation Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{RISK_SUMMARY_ROWS}}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DETAILED FINDINGS -->
+  <div class="page page-break">
+    <h2 id="findings">Detailed Findings</h2>
+    {{FINDINGS_HTML}}
+
+    <!-- FINDINGS_HTML should repeat blocks like:
+      <div class="finding" id="finding-1">
+        <div class="finding-title">
+          <h3>Multi-Factor Authentication Not Enabled on Login Portal</h3>
+          <span class="badge sev-medium">Medium</span>
+        </div>
+        <div class="kv">
+          <div class="k">Risk Rating</div><div class="v">Medium (High)</div>
+          <div class="k">CVSS Overall</div><div class="v">6.0</div>
+          <div class="k">Category</div><div class="v">Configuration Management</div>
+          <div class="k">Impacted Systems</div><div class="v">https://demo.celopay.com/</div>
+          <div class="k">References</div><div class="v">NIST SP 800-63r3</div>
+        </div>
+
+        <div class="section-label">Description</div>
+        <p>...</p>
+
+        <div class="section-label">Impact</div>
+        <p>...</p>
+
+        <div class="section-label">Evidence</div>
+        <p><em>Screenshot Placeholder: [Evidence Screenshot to be Inserted Here]</em></p>
+
+        <div class="section-label">Remediation</div>
+        <table>
+          <thead><tr><th>Who</th><th>Action</th></tr></thead>
+          <tbody><tr><td>IT Team</td><td>...</td></tr></tbody>
+        </table>
+
+        <div class="section-label">Management Response</div>
+        <p>Not Provided</p>
+      </div>
+    -->
+  </div>
+
+  <!-- API SCENARIOS (if needed separately) -->
+  <div class="page page-break">
+    <h2 id="api">Application Programming Interface (API) Scenarios</h2>
+    {{API_SCENARIOS_HTML}}
+  </div>
+
+  <!-- APPENDICES -->
+  <div class="page page-break">
+    <h2 id="appendix-a">Appendix A: Methodology</h2>
+    {{APPENDIX_A_HTML}}
+
+    <div class="page-break"></div>
+    <h2 id="appendix-b">Appendix B: Glossary of Terms</h2>
+    {{APPENDIX_B_HTML}}
+
+    <div class="page-break"></div>
+    <h2 id="appendix-c">Appendix C: Post-Test Clean-Up</h2>
+    {{APPENDIX_C_HTML}}
+  </div>
+
+</body>
+</html>
