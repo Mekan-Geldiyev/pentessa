@@ -1,0 +1,27 @@
+#!/bin/bash
+
+export OPENAI_API_KEY=your_key
+TARGET="http://testphp.vulnweb.com"
+HOST="testphp.vulnweb.com"
+
+cd /opt/pentest/Cyber-AutoAgent
+
+# Run short test pentest
+python3 src/cyberautoagent.py \
+  --target "$TARGET" \
+  --objective "Test run" \
+  --provider bedrock \
+  --module general \
+  --iterations 1 \
+  --auto-run
+
+# Get latest operation folder
+LATEST=$(ls -td outputs/$HOST/OP_* | head -1)
+
+# Read report
+REPORT=$(cat $LATEST/report.md)
+
+# Send to webhook
+curl -X POST "https://n1ktron8.app.n8n.cloud/webhook-test/da7193e8-daeb-4d8b-bae5-86f5644e3ade" \
+  -H "Content-Type: application/json" \
+  -d "{\"text\": \"$REPORT\"}"
