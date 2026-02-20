@@ -10,7 +10,7 @@ cd /opt/pentest/Cyber-AutoAgent
 python3 src/cyberautoagent.py \
   --target "$TARGET" \
   --objective "Test run" \
-  --provider bedrock \
+  --provider litellm \
   --module general \
   --iterations 1 \
   --auto-run
